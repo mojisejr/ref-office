@@ -1,0 +1,15 @@
+# Customer work never enters git: inputs, outputs and job state stay on this machine.
+jobs/*
+!jobs/README.md
+!jobs/_template/
+!jobs/_template/**
+
+# Real documents used for dogfood are copyrighted; only synthetic sets are committed.
+dogfood/private/
+
+# Machine-local
+.env
+.env.*
+*.log
+.DS_Store
+node_modules/
