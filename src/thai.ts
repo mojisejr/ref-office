@@ -58,6 +58,12 @@ export function renderThai(item: ParsedItem): string {
       body = `*${md(c.title)}*${kind ? ` [${kind}]` : ""}.${arch}`;
       return `${head ?? ""} ${body}${link}`.trim();
     }
+    case "speech": {
+      const kind = c.genre ? ` [${md(c.genre)}]` : "";
+      const where = [c["event-title"], c["event-place"]].filter(Boolean).map((s) => md(s!)).join(", ");
+      body = `*${md(c.title)}*${kind}.${where ? ` ${end(where)}` : ""}`;
+      break;
+    }
     case "webpage": {
       const site = c["container-title"] ? ` ${end(md(c["container-title"]))}` : "";
       body = `*${md(c.title)}*.${site}`;
@@ -71,8 +77,26 @@ export function renderThai(item: ParsedItem): string {
   return `${head} ${body}${link}`.trim();
 }
 
-/** Thai alphabetical order on the first author, then year. */
+const authorsKey = (i: ParsedItem) => (i.csl.author?.length ? i.csl.author.map(nameText).join("|") : i.csl.title);
+
+/**
+ * Thai alphabetical order on the authors, then year, then title. Works by the
+ * same authors in the same year get ก, ข, ... after the year, in title order,
+ * as English entries get a, b.
+ */
 export function sortThai(items: ParsedItem[]): ParsedItem[] {
-  const key = (i: ParsedItem) => (i.csl.author?.[0] ? nameText(i.csl.author[0]) : i.csl.title);
-  return [...items].sort((a, b) => collator.compare(key(a), key(b)) || when(a.csl).localeCompare(when(b.csl)));
+  const sorted = [...items].sort(
+    (a, b) => collator.compare(authorsKey(a), authorsKey(b)) || when(a.csl).localeCompare(when(b.csl)) || collator.compare(a.csl.title, b.csl.title),
+  );
+  const groups = new Map<string, ParsedItem[]>();
+  for (const i of sorted) {
+    const k = `${authorsKey(i)}#${when(i.csl)}`;
+    groups.set(k, [...(groups.get(k) ?? []), i]);
+  }
+  const letters = "กขคงจฉชซฌญ";
+  return sorted.map((i) => {
+    const g = groups.get(`${authorsKey(i)}#${when(i.csl)}`)!;
+    if (g.length < 2 || i.csl["year-suffix"]) return i;
+    return { ...i, csl: { ...i.csl, "year-suffix": letters[g.indexOf(i)] } };
+  });
 }

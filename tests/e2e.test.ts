@@ -51,14 +51,20 @@ describe("a chapter goes through the office", async () => {
     expect(ex.fieldCodes).toEqual([]);
   });
 
-  test("Thai entries hold the build for the owner; nothing is packaged", async () => {
+  test("an entry the agent doubts holds the build for the owner; nothing is packaged", async () => {
     writeFileSync(join(dir, "work", "parsed.json"), JSON.stringify({
-      items: picks.map((g, i) => ({ source: i + 1, lang: /\p{Script=Thai}/u.test(g.raw) ? "th" : "en", csl: g.csl })),
+      items: picks.map((g, i) => ({
+        source: i + 1, lang: /\p{Script=Thai}/u.test(g.raw) ? "th" : "en", csl: g.csl,
+        ...(i >= 3 ? { uncertain: ["ตรวจการแบ่งชื่อผู้แต่ง"] } : {}),
+      })),
     }));
     const r = await buildJob(dir, { fetch: fetchFake, pdf: false });
     expect(r).toEqual({ outcome: "needs-review", flagged: [4, 5] });
     expect(await Bun.file(join(dir, "out", "references.docx")).exists()).toBe(false);
-    expect(await Bun.file(join(dir, "work", "flags.md")).text()).toContain("รายการที่ 4");
+    const flags = await Bun.file(join(dir, "work", "flags.md")).text();
+    expect(flags).toContain("รายการที่ 4");
+    // Found in dogfood: the owner must see what the entry will become, not only what was written.
+    expect(flags).toContain(`จะออกมาเป็น: ${thai[0].expected}`);
   });
 
   test("after approval the package is built and the cross-check is clean", async () => {
@@ -83,6 +89,14 @@ describe("a chapter goes through the office", async () => {
     expect(r.outcome).toBe("guard-failed");
     expect(await Bun.file(join(dir, "out", "references.docx")).exists()).toBe(false);
   });
+});
+
+// Found in dogfood: a Word numbered list and Shift+Enter lines were read as one entry.
+test("Word numbered lists and hard line breaks give one entry per line", async () => {
+  const md = "Body (Vygotsky, 1978).\n\n# References\n\n1. " + english[0].raw + "\n2. " + english[2].raw + "\n\n" + english[7].raw + "\\\n" + english[1].raw;
+  const dir = await makeJob("lists", md);
+  const ex = await extract(join(dir, "input", "chapter.docx"));
+  expect(ex.entries).toEqual([english[0].raw, english[2].raw, english[7].raw, english[1].raw].map((s) => s.replace(/\s+/g, " ")));
 });
 
 test("a file with EndNote field codes is refused before any work", async () => {

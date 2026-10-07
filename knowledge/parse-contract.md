@@ -42,12 +42,19 @@ words are visible in its own entry.
 - **type:** `book`, `chapter` (also a paper in proceedings with an editor),
   `paper-conference`, `article-journal`, `thesis` (with `genre`:
   "Master's thesis", "Doctoral dissertation", "วิทยานิพนธ์มหาบัณฑิต",
-  "วิทยานิพนธ์ดุษฎีบัณฑิต" and `publisher` = the university), `webpage`, `report`.
+  "วิทยานิพนธ์ดุษฎีบัณฑิต" and `publisher` = the university), `webpage`, `report`,
+  `speech` for a talk or paper presented at a conference but not published in
+  proceedings ("Paper presented at ...": `genre` "Paper presentation" or
+  "การนำเสนอผลงาน", `event-title`, `event-place`).
 - **edition** as a number string (`"7"`); `page` as written (`"24-39"`); `DOI`
   without the `https://doi.org/` prefix.
 - **fixes** (Thai, short): what you changed and why, for the customer's report.
 - **uncertain** (Thai): anything you are not sure of. It blocks release until
   the owner approves, so use it whenever an entry could be read two ways.
+  Thai entries and articles Crossref does not hold are released without owner
+  review, so for them `uncertain` is the only thing that brings a doubt to the
+  owner: name where the author ends and the title starts if it is unclear,
+  odd spacing, a missing publisher, or a type you had to guess.
 - **skipped:** a line that is not a reference (a stray heading, a sentence).
   Never skip a real reference, even a broken one.
 

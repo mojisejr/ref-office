@@ -1,0 +1,59 @@
+schema_version: ciel.event.v0.1
+id: evt_20261007T125646_ref_office_slice3_closeout
+type: closeout
+recorded_at: 2026-10-07T12:56:46+07:00
+recorded_by:
+  human: owner
+  agent: claude
+workstream:
+  id: ref-office-001
+  lane: single
+  objective: >-
+    Build the pipeline that turns a customer file into a delivery package and a
+    checker that refuses to release anything it is unsure of.
+  scope:
+    - Extraction, release guard, Crossref check, APA 7 and Thai rendering, docx and pdf, in-text cross-check, change report.
+    - Golden set and seeded-error tests.
+  out_of_scope:
+    - Dogfood on real documents, token measurement, and the G1 decision.
+outcome:
+  status: slice-3-merged
+  completed:
+    - Owner merged ref-office PR 2 at 19f1b08; local main matches origin/main and bun test passes there.
+    - Owner reviewed the sample package and accepted a third status, format-only, for entries Crossref does not hold; they are not flagged to the owner but are listed in the customer's report.
+  not_completed:
+    - The closeout copy for docs/delivery could not go on the PR head because the PR was merged first; it will ride with the next ref-office PR.
+evidence:
+  plan: workstreams/ref-office-001/PLAN.md
+  plan_revision: "0.1"
+  slice: "3"
+  repository:
+    head: 0185e3116066848cf4bde14f46c0f88d78ee9ee5
+    branch: hq/20261005
+  child_repository:
+    canonical_remote: github.com/mojisejr/ref-office
+    branch: feat/pipeline
+    implementation_head: 1570812c5eeee66aa8ae39e270359919bfe6a161
+  pull_request:
+    number: 2
+    url: https://github.com/mojisejr/ref-office/pull/2
+    base: main
+    observed_head: 1570812c5eeee66aa8ae39e270359919bfe6a161
+    merge_commit: 19f1b08b50cdd5500bee7926646a22ccc6849db1
+    state_at_recording: merged
+  checks:
+    tests: bun test 62 passed, 0 failed, on main after merge.
+    golden_set: 31 hand-written entries (17 English, 2 same-author-year, 12 Thai) rendered exactly as expected.
+    seeded_errors: 23 seeded-error tests caught, including invented, dropped and altered entries, wrong or missing DOI, and year mismatch.
+    defects_found_by_golden_set: doubled n.d., lost URL underscores, unspaced author ellipsis, Thai appendix read as references.
+    timing: 31-entry sample with live Crossref built in 7.6 s, 1.6 s from cache; target was 15 minutes for 30 entries.
+    owner_review: Owner opened the sample references.pdf and report.pdf and accepted them.
+unresolved:
+  - The agent parse step has not run on a real customer document; it is the only non-deterministic step.
+  - Thai entries are all flagged to the owner, which may push owner time per job past the G1 target on Thai-heavy jobs.
+  - Institution-specific variants beyond order and font are handled by hand per job.
+  - Tokens per job under the subscription plan are not measured yet.
+next_action:
+  action: Owner decides how much dogfood G1 needs before the listing is submitted (slice 4).
+  acceptance_check:
+    - A decision event records the G1 scope the owner chooses.

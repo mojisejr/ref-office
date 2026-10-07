@@ -120,6 +120,13 @@ export const english: Golden[] = [
   },
 ];
 
+english.push({
+  name: "paper presented at a conference, not in proceedings",
+  raw: "Inprasitha, M. (2006). Open-ended approach and teacher education. Paper presented at The Second APEC-Tsukuba International Conference, Tsukuba, Japan.",
+  csl: { type: "speech", genre: "Paper presentation", author: [{ family: "Inprasitha", given: "M." }], issued: y(2006), title: "Open-ended approach and teacher education", "event-title": "The Second APEC-Tsukuba International Conference", "event-place": "Tsukuba, Japan" },
+  expected: "Inprasitha, M. (2006). Open-ended approach and teacher education [Paper presentation]. The Second APEC-Tsukuba International Conference, Tsukuba, Japan.",
+});
+
 /** Same author and year twice: APA adds a and b by title. Rendered together. */
 export const sameAuthorYear: Golden[] = [
   {

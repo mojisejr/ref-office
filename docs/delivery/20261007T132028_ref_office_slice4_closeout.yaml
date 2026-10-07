@@ -1,0 +1,62 @@
+schema_version: ciel.event.v0.1
+id: evt_20261007T132028_ref_office_slice4_closeout
+type: closeout
+recorded_at: 2026-10-07T13:20:28+07:00
+recorded_by:
+  human: owner
+  agent: claude
+workstream:
+  id: ref-office-001
+  lane: single
+  objective: >-
+    Run the office on real and synthetic documents before customers do, and
+    fix what breaks, while the listing waits for Fastwork review.
+  scope:
+    - Three dogfood documents under plan 0.2 (two real ThaiJO reference lists, one synthetic student chapter).
+    - Fixes and tests for every defect found; the G1 dogfood report.
+  out_of_scope:
+    - Owner minutes and tokens per job, measured on the first three real orders.
+    - Submitting the listing, which is the owner's action.
+outcome:
+  status: slice-4-ready-for-owner-merge
+  completed:
+    - Nine defects found and fixed, each with a test; bun test 71 passed, 0 failed.
+    - Owner narrowed the flag policy at 13:15; flags on the real 31-entry list fell from 25 to 9.
+    - docs/g1-dogfood.md records per-document results, defects, the policy change, and open items.
+    - The slice 3 delivery record now rides in this PR, as the slice 3 closeout said.
+  not_completed:
+    - PR 3 is not merged; merge belongs to the owner.
+evidence:
+  plan: workstreams/ref-office-001/PLAN.md
+  plan_revision: "0.2"
+  slice: "4"
+  repository:
+    head: 5aa2dff9dedd8573f4bcf5eec4c47645180f3973
+    branch: hq/20261005
+  child_repository:
+    canonical_remote: github.com/mojisejr/ref-office
+    branch: feat/dogfood-fixes
+    implementation_head: 01b0d4df43b02d2d1d2cac75e220b757d4650e3d
+  pull_request:
+    number: 3
+    url: https://github.com/mojisejr/ref-office/pull/3
+    base: main
+    observed_head: 01b0d4df43b02d2d1d2cac75e220b757d4650e3d
+    state_at_recording: draft
+  delivery_record: docs/delivery/20261007T132028_ref_office_slice4_closeout.yaml
+  checks:
+    tests: bun test 71 passed, 0 failed.
+    dogfood_1: Real ThaiJO list, 31 entries, 9 flags under the current policy, builds 5-8 s live and under 2 s cached.
+    dogfood_2: Synthetic chapter, 7 entries, 0 flags, cross-check found the three planted errors.
+    dogfood_3: Real ThaiJO list, 32 entries, 10 flags, all concrete questions.
+    serious_problems_open: none; G1 rev 0.2 does not call for pausing the listing.
+unresolved:
+  - Owner minutes and tokens per job are unmeasured until the first three real orders.
+  - Extracted Thai text from PDFs is unreliable; PDF jobs depend on the agent reading page images.
+  - Some flags are questions only the customer can answer; routing them to the customer report is undecided.
+  - The HQ standing branch is unpushed; pushing and merging it belong to the owner.
+next_action:
+  action: Owner merges ref-office PR 3 and submits the Fastwork listing; the first three real orders then measure owner time and tokens (slice 6).
+  acceptance_check:
+    - PR 3 merged and local main matches origin/main.
+    - Listing submitted with the edited description; approval recorded when Fastwork grants it (slice 5).

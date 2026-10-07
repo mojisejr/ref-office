@@ -40,6 +40,10 @@ jobs/<id>/
 2. **`จ่ายแล้ว`** — set `paid_at` and `deadline` (1 day after payment, or 3 h
    for express inside 09–21), status `processing`, and hand the owner the
    "received" message.
+   **PDF instead of Word:** do not trust extracted Thai text (sara am is lost
+   and spaces appear inside words). Read the reference pages as images, type
+   the list as printed into `input/<name>.txt` (one entry per paragraph, a
+   blank line between), keep the PDF beside it, and quote a longer deadline.
 3. **Parse** — write `work/parsed.json` from `work/entries.txt` following
    [knowledge/parse-contract.md](../knowledge/parse-contract.md).
 4. **Build** — `bun run job build <id>`. Exit codes: `0` ready, `2` needs

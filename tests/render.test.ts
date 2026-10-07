@@ -32,6 +32,15 @@ describe("golden set: Thai renderer", () => {
   });
 });
 
+test("same Thai author and year get ก and ข after the year, by title", async () => {
+  const a = { ...thai[0].csl, title: "ปรัชญาเบื้องต้น" };
+  const b = { ...thai[0].csl, title: "ตรรกวิทยาทั่วไป" };
+  const r = await renderAll([{ source: 1, lang: "th", csl: a }, { source: 2, lang: "th", csl: b }] as ParsedItem[]);
+  expect(r.map((e) => e.source)).toEqual([2, 1]);
+  expect(plain(r[0].md)).toStartWith("กีรติ บุญเจือ. (2547ก). ตรรกวิทยาทั่วไป");
+  expect(plain(r[1].md)).toStartWith("กีรติ บุญเจือ. (2547ข). ปรัชญาเบื้องต้น");
+});
+
 test("every golden raw entry passes the guard against its own parse", () => {
   const all = [...english, ...sameAuthorYear, ...thai];
   const parsed = { items: all.map((g, i) => ({ source: i + 1, lang: /\p{Script=Thai}/u.test(g.raw) ? "th" : "en", csl: g.csl }) as ParsedItem) };
