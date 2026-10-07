@@ -1,0 +1,17 @@
+{
+  "id": "YYYYMMDD-HHMM-alias",
+  "alias": "alias",
+  "package": "start",
+  "style": "apa7",
+  "check_in_text": false,
+  "institution": null,
+  "entries": 0,
+  "received_at": null,
+  "paid_at": null,
+  "deadline": null,
+  "delivered_at": null,
+  "purge_after": null,
+  "revisions_used": 0,
+  "status": "quoted",
+  "notes": ""
+}

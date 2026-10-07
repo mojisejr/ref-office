@@ -1,0 +1,10 @@
+{
+  "name": "ref-office",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.md",
+  "type": "module",
+  "scripts": {
+    "jobs": "bun scripts/jobs.ts",
+    "test": "bun test"
+  }
+}
