@@ -1,0 +1,60 @@
+schema_version: ciel.event.v0.1
+id: evt_20261007T114316_ref_office_slice2_closeout
+type: closeout
+recorded_at: 2026-10-07T11:43:16+07:00
+recorded_by:
+  human: owner
+  agent: claude
+workstream:
+  id: ref-office-001
+  lane: single
+  objective: >-
+    Give the office its skeleton so a session opened here or from HQ knows how
+    to take a job: desk instructions, runbooks, knowledge, and an ignored jobs area.
+  scope:
+    - Public repository mojisejr/ref-office, seeded once on main, skeleton on a topic branch with a draft PR.
+    - Project registration in HQ and the local binding.
+  out_of_scope:
+    - Pipeline tools, checker, golden set, dogfood, and the Fastwork listing.
+outcome:
+  status: slice-2-ready-for-owner-merge
+  completed:
+    - Created the public repository; the owner pushed the seed commit be9aa90 to main because the harness blocks agent pushes to main.
+    - Wrote CLAUDE.md, runbooks 00-02, four knowledge files, the jobs template, and bun run jobs with tests.
+    - Owner read runbook 00 and confirmed it; his one request, opening the office from ciel-os, was added in c1c0629.
+    - Registered project ref-office in HQ (5dbaf96); Wake reports the binding available with a matching origin.
+  not_completed:
+    - The pull request is not merged; merge belongs to the owner.
+evidence:
+  plan: workstreams/ref-office-001/PLAN.md
+  plan_revision: "0.1"
+  slice: "2"
+  repository:
+    head: 94395a6a4fd312a55bc4b6080c744f1461662798
+    branch: hq/20261005
+  child_repository:
+    canonical_remote: github.com/mojisejr/ref-office
+    branch: feat/office-skeleton
+    implementation_head: c1c0629cdfefcaf57012430014f25a4804cf8ee7
+  pull_request:
+    number: 1
+    url: https://github.com/mojisejr/ref-office/pull/1
+    base: main
+    observed_head: c1c0629cdfefcaf57012430014f25a4804cf8ee7
+    state_at_recording: draft
+  delivery_record: docs/delivery/20261007T114316_ref_office_slice2_closeout.yaml
+  checks:
+    tests: bun test passed 2 tests for deadline ordering, overdue and due-soon flags, and purge listing.
+    ignore_proof: Probe files under jobs/<id>/ and dogfood/private/ were ignored; jobs/README.md and jobs/_template/ were tracked.
+    content_scan: No email, phone number, token, session link, or control byte in the tree.
+    license: LICENSE.md is the PolyForm Noncommercial 1.0.0 text fetched from the polyform-licenses repository at tag 1.0.0.
+    wake: No validation errors; project ref-office bound at checkouts/ref-office.
+unresolved:
+  - The open-jobs listing was proven with tests only; no real job has passed through the office.
+  - Measuring tokens per job under the subscription plan is still unsettled and is assigned to slice 4.
+  - The HQ standing branch is unpushed; pushing and merging it belong to the owner.
+next_action:
+  action: Owner merges ref-office PR 1; then the owner says go on slice 3, the pipeline tools, checker, and golden set.
+  acceptance_check:
+    - PR 1 merged into main and the local checkout returned to a clean main matching origin/main.
+    - A decision event authorizes plan 0.1 slice 3 before tool work starts.
