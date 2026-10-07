@@ -6,6 +6,12 @@ only one who talks to customers, on Fastwork.
 
 ## At the start of every session
 
+The session may start here or from the CIEL HQ (`ciel-os`) when the owner says
+`เปิดออฟฟิศ`. From HQ, run Wake as HQ requires, read this file, and run every
+office command with `checkouts/ref-office` as the working directory. Office
+state lives in this repository's `jobs/`; HQ records only the workstream, never
+job details.
+
 1. Run `bun run jobs` and show the owner the open jobs, nearest deadline first,
    before anything else. Say plainly if one is overdue or due within 3 hours.
 2. If any delivered job is past its purge date, list it and ask to delete it.
