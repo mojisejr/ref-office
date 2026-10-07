@@ -19,6 +19,7 @@ job details.
 ## How work flows
 
 - Taking a job: [runbooks/01-job-intake.md](runbooks/01-job-intake.md)
+- Turning entries into data: [knowledge/parse-contract.md](knowledge/parse-contract.md)
 - Which model to run on: [runbooks/02-model-choice.md](runbooks/02-model-choice.md)
 - Rules for the output: [knowledge/apa7-rules.md](knowledge/apa7-rules.md) and
   [knowledge/thai-rules.md](knowledge/thai-rules.md)
