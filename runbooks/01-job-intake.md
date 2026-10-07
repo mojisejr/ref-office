@@ -31,22 +31,27 @@ jobs/<id>/
 
 ## Steps
 
-1. **`งานใหม่`** — create the folder, save the customer's file to `input/`,
-   count the entries, check the scope (knowledge/scope-lines.md) and for
-   EndNote/Zotero field codes. Reply in Thai with package, price, deadline, and
-   the quote message from knowledge/replies.md. Status `quoted`.
+1. **`งานใหม่`** — `bun run job new <alias>`, save the customer's file to
+   `input/`, then `bun run job extract <id>`. It counts the entries and reports
+   EndNote/Zotero field codes (if any: replies.md #5, stop). Check the scope
+   (knowledge/scope-lines.md). Reply in Thai with package, price, deadline, and
+   the quote message from knowledge/replies.md. Set `package`,
+   `check_in_text`, `entries`, and `order`/`font` if the customer asked. Status `quoted`.
 2. **`จ่ายแล้ว`** — set `paid_at` and `deadline` (1 day after payment, or 3 h
    for express inside 09–21), status `processing`, and hand the owner the
    "received" message.
-3. **Work** — until slice 3 of ref-office-001 lands, the pipeline does not
-   exist; do not take real paid jobs before the owner has passed gate G1.
-4. **Flags** — anything uncertain goes to `needs-review` with one line per
-   entry: which entry, what is uncertain, what you need from the owner.
-5. **`พร้อมส่ง`** — status `ready`; give the owner the `out/` path and the
+3. **Parse** — write `work/parsed.json` from `work/entries.txt` following
+   [knowledge/parse-contract.md](../knowledge/parse-contract.md).
+4. **Build** — `bun run job build <id>`. Exit codes: `0` ready, `2` needs
+   review, `3` guard failed (fix parsed.json, never the guard), `4` field codes.
+5. **Flags** — on exit 2, show the owner `work/flags.md` in Thai, one line per
+   entry. When the owner approves, `bun run job approve <id> <n>...` and build
+   again; when the owner corrects, fix parsed.json and build again.
+6. **`พร้อมส่ง`** — status `ready`; give the owner the `out/` path and the
    delivery message filled in with the numbers from the change report.
-6. **`ส่งแล้ว`** — set `delivered_at`, `purge_after` = delivered_at + 30 days,
+7. **`ส่งแล้ว`** — set `delivered_at`, `purge_after` = delivered_at + 30 days,
    status `delivered`.
-7. **`แก้งาน <id>`** — within the original scope and under 3 revisions it is a
+8. **`แก้งาน <id>`** — within the original scope and under 3 revisions it is a
    revision (`revisions_used` + 1); anything new is a new job and needs a quote.
 
 ## Purge

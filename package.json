@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "jobs": "bun scripts/jobs.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "job": "bun scripts/job.ts"
   }
 }
