@@ -1,0 +1,65 @@
+schema_version: ciel.event.v0.1
+id: evt_20261007T185510_ref_office_slice5_closeout
+type: closeout
+recorded_at: 2026-10-07T18:55:10+07:00
+recorded_by:
+  human: owner
+  agent: claude
+workstream:
+  id: ref-office-001
+  lane: single
+  objective: >-
+    Launch the shop: the Fastwork listing is approved and its final text,
+    packages, and banner live in the office repository with a runbook for
+    changing them.
+  scope:
+    - Record the owner-confirmed Fastwork approval.
+    - Move the approved description, packages, banner, and banner source from the ignored HQ .assets/ref-office/ into ref-office shop/.
+    - Runbook 03 for changing the listing; README and CLAUDE.md links.
+  out_of_scope:
+    - First real orders, owner minutes, and tokens per job (slice 6).
+    - The real dogfood sample outputs in .assets/ref-office/sample/, which come from a published article and stay out of the public repository.
+outcome:
+  status: slice-5-ready-for-owner-merge
+  completed:
+    - Owner confirmed in this session that Fastwork approved the listing on 2026-10-07 and asked to close slice 5.
+    - shop/description.txt is byte-identical to the submitted draft; shop/listing.md holds title, category, starting price, packages, and ties each promise to docs/g1-dogfood.md.
+    - The listing and banner carry no link, phone, LINE, or email.
+    - Saved replies (first contact, quote, job accepted, delivery) were already in knowledge/replies.md; runbook 03 points to them and to runbook 00.
+    - bun test 71 passed, 0 failed; no code changed.
+  not_completed:
+    - PR 4 is not merged; merge belongs to the owner.
+    - No separate banner caption file existed in .assets/ref-office/; the banner text lives in shop/banner.html.
+evidence:
+  plan: workstreams/ref-office-001/PLAN.md
+  plan_revision: "0.2"
+  slice: "5"
+  repository:
+    head: 7eaa3ee309a0f0b09b21eae5b40f09555fce81d1
+    branch: hq/20261005
+  child_repository:
+    canonical_remote: github.com/mojisejr/ref-office
+    branch: feat/shop-listing
+    implementation_head: b23b95133f3f6ea1b6e9d598a4410e67cc8b9273
+  pull_request:
+    number: 4
+    url: https://github.com/mojisejr/ref-office/pull/4
+    base: main
+    observed_head: b23b95133f3f6ea1b6e9d598a4410e67cc8b9273
+    state_at_recording: draft
+  delivery_record: docs/delivery/20261007T185510_ref_office_slice5_closeout.yaml
+  owner_report: "ตอนนี้ fastwork อนุมัติแล้ว"
+  checks:
+    tests: bun test 71 passed, 0 failed.
+    description_match: cmp of shop/description.txt against the submitted draft reports no difference.
+    contact_scan: grep for links, phone, LINE, and email in shop/ and runbook 03 finds none.
+unresolved:
+  - Owner minutes and tokens per job are unmeasured until the first three real orders (G1, plan 0.2).
+  - Questions only the customer can answer still reach the owner as flags; routing is undecided.
+  - If the owner edited any listing text inside Fastwork after the 13:01 draft, shop/ does not have that edit yet.
+  - The HQ standing branch hq/20261005 is unpushed; pushing and merging it belong to the owner.
+next_action:
+  action: Owner merges ref-office PR 4; when the first order arrives, run it through runbook 00 as slice 6 and write down owner minutes and tokens.
+  acceptance_check:
+    - PR 4 merged and local main matches origin/main.
+    - First real order delivered with owner time and token use recorded.

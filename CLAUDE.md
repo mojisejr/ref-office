@@ -25,6 +25,7 @@ job details.
   [knowledge/thai-rules.md](knowledge/thai-rules.md)
 - What we do and refuse: [knowledge/scope-lines.md](knowledge/scope-lines.md)
 - Messages for the owner to paste: [knowledge/replies.md](knowledge/replies.md)
+- Changing the Fastwork listing: [runbooks/03-fastwork-listing.md](runbooks/03-fastwork-listing.md)
 
 Talk to the owner in Thai. Keep identifiers, file names and commits in English.
 

@@ -11,6 +11,7 @@ checker flags. Customer files never enter this repository.
 | [`CLAUDE.md`](CLAUDE.md) | How the agent runs the office desk in a session |
 | [`runbooks/`](runbooks/) | Step-by-step procedures. Start with [00-owner-3-minutes](runbooks/00-owner-3-minutes.md) |
 | [`knowledge/`](knowledge/) | APA 7 rules, Thai rules, ready replies, scope lines |
+| [`shop/`](shop/listing.md) | The approved Fastwork listing: description, packages, banner |
 | [`jobs/`](jobs/) | One folder per order. Ignored by git except the README and template |
 | [`scripts/`](scripts/) | `bun run jobs` lists open jobs by deadline; `bun run job new\|extract\|build\|approve` runs one job |
 | [`src/`](src/) | The pipeline: extract → guard → Crossref check → APA 7 render (citeproc for English, Thai renderer) → docx/pdf → in-text cross-check → change report |

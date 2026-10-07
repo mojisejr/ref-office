@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=Tinos:ital,wght@0,400;1,400&display=block">
+<style>
+  :root { --ink:#0e2a2b; --teal:#0f4c4a; --teal-2:#13605d; --mint:#bfe8d6; --paper:#ffffff; --red:#d23a3a; --green:#1f8a55; --muted:#5c6b6b; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; }
+  body { font-family: "IBM Plex Sans Thai", sans-serif; background: var(--teal); color: #fff; position: relative; }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(900px 600px at 105% 110%, var(--teal-2) 0%, transparent 60%),
+      linear-gradient(135deg, #0d4341 0%, #0f4c4a 55%, #11504d 100%); }
+  .grid { position:absolute; inset:0; opacity:.07;
+      background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
+      background-size: 40px 40px; }
+  .left { position:absolute; left:60px; top:58px; width:620px; display:flex; flex-direction:column; gap:16px; }
+  .tag { display:inline-flex; align-self:flex-start; gap:10px; align-items:center; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:8px 18px; font-size:22px; font-weight:600; letter-spacing:.02em; }
+  h1 { white-space: nowrap; font-size: 78px; line-height: 1.22; font-weight: 700; letter-spacing:-.01em; }
+  .sub { font-size: 34px; font-weight: 600; color: var(--mint); margin-top:-6px; }
+  ul { list-style:none; display:flex; flex-direction:column; gap:14px; margin-top:10px; }
+  li { display:flex; gap:14px; align-items:center; font-size: 26px; font-weight:600; }
+  li .ck { flex:none; width:34px; height:34px; border-radius:50%; background: var(--mint); color: var(--teal); display:grid; place-items:center; font-size:24px; font-weight:700; }
+  .foot { margin-top:6px; font-size: 22px; color: rgba(255,255,255,.8); }
+  .right { position:absolute; right:44px; top:70px; width:540px; height:592px; }
+  .card { position:absolute; background: var(--paper); color:#1b1b1b; border-radius:10px; box-shadow: 0 24px 50px -18px rgba(0,0,0,.55); padding: 24px 28px; width: 520px; }
+  .card .lbl { font-family:"IBM Plex Sans Thai",sans-serif; font-size:22px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .before { left: 0; top: 0; transform: rotate(-2.2deg); }
+  .before .lbl { color: var(--red); }
+  .before p { font-family:"Tinos",serif; font-size:22px; line-height:1.55; color:#333; }
+  .squig { text-decoration: underline wavy var(--red); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+  .after { left: 16px; top: 240px; transform: rotate(1.4deg); border-top: 6px solid var(--green); }
+  .after .lbl { color: var(--green); }
+  .after .head { font-family:"Tinos",serif; font-weight:700; text-align:center; font-size:22px; margin-bottom:8px; }
+  .after p { font-family:"Tinos",serif; font-size:21px; line-height:1.75; padding-left:36px; text-indent:-36px; }
+  .after p + p { margin-top:4px; }
+  .arrow { position:absolute; left: 226px; top: 188px; width:64px; height:64px; border-radius:50%; background: var(--mint); color: var(--teal); display:grid; place-items:center; font-size:38px; font-weight:700; box-shadow: 0 10px 24px -8px rgba(0,0,0,.5); z-index:2; }
+</style></head>
+<body>
+  <div class="bg"></div><div class="grid"></div>
+  <div class="left">
+    <div class="tag">APA 7 · ไทย – อังกฤษ</div>
+    <h1>จัดบรรณานุกรม<br>ให้ถูกต้อง</h1>
+    <div class="sub">อาจารย์ไม่ต้องตีกลับอีก</div>
+    <ul>
+      <li><span class="ck">✓</span>ตรวจกับฐานข้อมูลบทความจริง (DOI)</li>
+      <li><span class="ck">✓</span>ตรวจอ้างอิงในเนื้อหาให้ตรงทุกรายการ</li>
+      <li><span class="ck">✓</span>ได้ Word + PDF + รายงานการแก้</li>
+    </ul>
+    <div class="foot">ส่งไว · แก้ได้ 3 ครั้ง · ทำตามคู่มือสถาบันได้</div>
+  </div>
+  <div class="right">
+    <div class="card before">
+      <div class="lbl">✕ ก่อน</div>
+      <p><span class="squig">Multivariate Data Analysis</span>, J.F. Hair, W.C. Black, B.J. Babin <span class="squig">and</span> R.E. Anderson, <span class="squig">Pearson 2010, 7th edition</span></p>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="card after">
+      <div class="lbl">✓ หลัง</div>
+      <div class="head">References</div>
+      <p>Hair,&nbsp;J.&nbsp;F., Black,&nbsp;W.&nbsp;C., Babin,&nbsp;B.&nbsp;J., &amp; Anderson,&nbsp;R.&nbsp;E. (2010). <i>Multivariate data analysis</i> (7th ed.). Pearson.</p>
+      <p>Vygotsky,&nbsp;L.&nbsp;S. (1978). <i>Mind in society: The development of higher psychological processes</i>. Harvard University Press.</p>
+    </div>
+  </div>
+</body></html>
