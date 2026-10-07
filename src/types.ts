@@ -12,6 +12,8 @@ export type Csl = {
   volume?: string;
   issue?: string;
   page?: string;
+  /** Article number (eLocator); APA prints it as "Article 100924" in place of pages. */
+  number?: string;
   edition?: string;
   publisher?: string;
   genre?: string;

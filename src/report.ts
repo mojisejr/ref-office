@@ -57,12 +57,13 @@ export function customerReport(opts: {
   return out.join("\n");
 }
 
-export function ownerFlags(checked: Checked[], entries: string[]): string {
+export function ownerFlags(checked: Checked[], entries: string[], rendered: Rendered[]): string {
+  const after = new Map(rendered.map((r) => [r.source, plain(r.md)]));
   const flagged = checked.filter((c) => c.status === "needs-review");
   const out = [`# รายการรอเจ้าของดู (${flagged.length})`, ""];
   for (const c of flagged) {
-    out.push(`## รายการที่ ${c.source}`, "", `ลูกค้าเขียน: ${entries[c.source - 1]}`, "");
-    out.push(...c.reasons.map((r) => `- ${r}`), "");
+    out.push(`## รายการที่ ${c.source}`, "", `ลูกค้าเขียน: ${entries[c.source - 1]}`, "", `จะออกมาเป็น: ${after.get(c.source) ?? ""}`, "");
+    out.push(...[...c.reasons, ...c.sourced].map((r) => `- ${r}`), "");
   }
   out.push("อนุมัติ: บอก agent ว่า `อนุมัติ <เลขรายการ>` หรือบอกสิ่งที่ต้องแก้");
   return out.join("\n");

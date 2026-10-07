@@ -49,14 +49,14 @@ export async function buildJob(dir: string, opts: { fetch: Fetch; pdf: boolean }
   await Bun.write(cachePath, JSON.stringify(cache));
   await Bun.write(join(work, "checked.json"), JSON.stringify(checked, null, 2));
 
+  const rendered = await renderAll(checked, job.order ?? "thai-first");
   const flagged = checked.filter((c) => c.status === "needs-review").map((c) => c.source);
   if (flagged.length) {
-    await Bun.write(join(work, "flags.md"), ownerFlags(checked, ex.entries));
+    await Bun.write(join(work, "flags.md"), ownerFlags(checked, ex.entries, rendered));
     await setStatus("needs-review");
     return { outcome: "needs-review", flagged };
   }
 
-  const rendered = await renderAll(checked, job.order ?? "thai-first");
   const heading = ex.heading ?? (checked.some((c) => c.lang === "th") ? "บรรณานุกรม" : "References");
   const findings = job.check_in_text ? crosscheck(ex.body, checked) : null;
 

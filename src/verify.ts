@@ -15,12 +15,32 @@ type Work = {
   volume?: string;
   issue?: string;
   page?: string;
+  "article-number"?: string;
 };
 
 const API = "https://api.crossref.org/works";
 const UA = { "User-Agent": "ref-office/0.1 (https://github.com/mojisejr/ref-office)" };
 
-export const liveFetch: Fetch = (url) => fetch(url, { headers: UA });
+const GAP_MS = 300;
+let lastCall = 0;
+
+/**
+ * Crossref's public pool answers 429 when called too fast. Calls are spaced,
+ * and 429 or 5xx is retried with backoff (honouring Retry-After) before giving up.
+ */
+export const liveFetch: Fetch = async (url) => {
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const wait = lastCall + GAP_MS - Date.now();
+    if (wait > 0) await Bun.sleep(wait);
+    lastCall = Date.now();
+    res = await fetch(url, { headers: UA });
+    if (res.status !== 429 && res.status < 500) return res;
+    const after = Number(res.headers.get("retry-after"));
+    await Bun.sleep(Number.isFinite(after) && after > 0 ? after * 1000 : 1000 * 2 ** attempt);
+  }
+  return res!;
+};
 
 export function titleSim(a: string, b: string): number {
   const A = new Set(norm(a).split(" ").filter(Boolean));
@@ -39,10 +59,29 @@ function cleanDoi(doi: string): string {
   return doi.replace(/^https?:\/\/(dx\.)?doi\.org\//i, "").replace(/^doi:\s*/i, "").trim();
 }
 
-/** Fills fields the customer left out from the matched record; never overwrites what they gave. */
-function fill(item: ParsedItem, w: Work, sourced: string[]): ParsedItem {
+const firstPage = (p: string) => p.split(/[-–]/)[0].trim();
+
+/**
+ * Reconciles an article with its matched record: fills what the customer left
+ * out, corrects the journal name to the published one, and reports volume,
+ * issue, or page numbers that disagree instead of overwriting them.
+ */
+function fill(item: ParsedItem, w: Work, sourced: string[], reasons: string[]): ParsedItem {
   const csl = { ...item.csl };
-  const set = (key: "container-title" | "volume" | "issue" | "page" | "DOI", value: string | undefined, label: string) => {
+  const journal = w["container-title"]?.[0];
+  if (journal && csl["container-title"] && norm(journal) !== norm(csl["container-title"])) {
+    sourced.push(`แก้ชื่อวารสารตามฐานข้อมูล Crossref: "${csl["container-title"]}" เป็น "${journal}"`);
+    csl["container-title"] = journal;
+  }
+  const differs: [string, string | undefined, string | undefined][] = [
+    ["ปีที่ (volume)", csl.volume, w.volume],
+    ["ฉบับที่ (issue)", csl.issue, w.issue],
+    ["เลขหน้า", csl.page && firstPage(csl.page), w.page && firstPage(w.page)],
+  ];
+  for (const [label, mine, theirs] of differs) {
+    if (mine && theirs && mine !== theirs) reasons.push(`${label}ไม่ตรงกับฐานข้อมูล (ลูกค้า ${mine}, ฐานข้อมูล ${theirs})`);
+  }
+  const set = (key: "container-title" | "volume" | "issue" | "page" | "number" | "DOI", value: string | undefined, label: string) => {
     if (value && !csl[key]) {
       csl[key] = value;
       sourced.push(`เพิ่ม${label}จากฐานข้อมูล Crossref: ${value}`);
@@ -52,7 +91,10 @@ function fill(item: ParsedItem, w: Work, sourced: string[]): ParsedItem {
   set("container-title", w["container-title"]?.[0], "ชื่อวารสาร");
   set("volume", w.volume, "ปีที่ (volume)");
   set("issue", w.issue, "ฉบับที่ (issue)");
-  set("page", w.page, "เลขหน้า");
+  // Journals that number articles put that number in Crossref's page field too; APA prints it as "Article N".
+  const articleNo = w["article-number"];
+  if (articleNo && !csl.page) set("number", articleNo, "เลขบทความ (article number)");
+  else set("page", w.page, "เลขหน้า");
   return { ...item, csl };
 }
 
@@ -102,25 +144,31 @@ export async function verifyItem(item: ParsedItem, get: Fetch): Promise<Checked>
     const wy = workYear(w);
     const y = year(item);
     if (wy && y && wy !== y) reasons.push(`ปีไม่ตรงกับฐานข้อมูล (ลูกค้า ${y}, ฐานข้อมูล ${wy})`);
-    return done("verified", fill({ ...item, csl: { ...item.csl, DOI: doi } }, w, sourced));
+    return done("verified", fill({ ...item, csl: { ...item.csl, DOI: doi } }, w, sourced, reasons));
   }
 
-  const first = item.csl.author?.[0];
-  const q = [item.csl.title, first && "family" in first ? first.family : "", year(item) ?? ""].join(" ");
-  const r = await get(`${API}?rows=5&query.bibliographic=${encodeURIComponent(q)}`);
-  if (r.status === 200) {
+  // Articles may appear online a year before print; books and chapters come in
+  // editions, so their year must match exactly and a search hit only confirms,
+  // never fills: a near match could be another edition's DOI.
+  const article = item.csl.type === "article-journal";
+  const slack = article ? 1 : 0;
+  const y = year(item);
+  const first = item.csl.author?.[0] ?? item.csl.editor?.[0];
+  const params = [`rows=10`, `query.bibliographic=${encodeURIComponent([item.csl.title, item.csl["container-title"] ?? ""].join(" ").trim())}`];
+  if (first && "family" in first) params.push(`query.author=${encodeURIComponent(first.family)}`);
+  if (y) params.push(`filter=from-pub-date:${y - slack},until-pub-date:${y + slack}`);
+  const r = await get(`${API}?${params.join("&")}`);
+  if (r.status !== 200) {
+    reasons.push(`ค้นฐานข้อมูลไม่สำเร็จ (HTTP ${r.status}) ไม่ได้แปลว่าไม่พบ ให้ build ใหม่ภายหลัง`);
+    return done("needs-review");
+  }
+  {
     const works: Work[] = (await r.json()).message?.items ?? [];
-    const y = year(item);
-    // Articles may appear online a year before print; books and chapters come in
-    // editions, so their year must match exactly and a search hit only confirms,
-    // never fills: a near match could be another edition's DOI.
-    const article = item.csl.type === "article-journal";
-    const slack = article ? 1 : 0;
     const hit = works.find((w) => matches(item, w).ok && (!y || !workYear(w) || Math.abs(workYear(w)! - y) <= slack));
     if (hit) {
       const wy = workYear(hit);
       if (wy && y && wy !== y) reasons.push(`ปีไม่ตรงกับฐานข้อมูล (ลูกค้า ${y}, ฐานข้อมูล ${wy})`);
-      return done("verified", article ? fill(item, hit, sourced) : item);
+      return done("verified", article ? fill(item, hit, sourced, reasons) : item);
     }
   }
   if (item.csl.type === "article-journal") {
@@ -136,14 +184,17 @@ export async function verifyAll(items: ParsedItem[], get: Fetch): Promise<Checke
   return out;
 }
 
-/** Wraps a fetch with an on-disk JSON cache so rebuilding a job does not query Crossref again. */
+/**
+ * Wraps a fetch with an on-disk JSON cache so rebuilding a job does not query
+ * Crossref again. Only answers are cached (200, 404); a failure is retried next build.
+ */
 export function cachedFetch(get: Fetch, cache: Record<string, { status: number; body: any }>): Fetch {
   return async (url) => {
-    if (!cache[url]) {
-      const r = await get(url);
-      cache[url] = { status: r.status, body: r.status === 200 ? await r.json() : null };
-    }
     const hit = cache[url];
-    return { status: hit.status, json: async () => hit.body };
+    if (hit) return { status: hit.status, json: async () => hit.body };
+    const r = await get(url);
+    const body = r.status === 200 ? await r.json() : null;
+    if (r.status === 200 || r.status === 404) cache[url] = { status: r.status, body };
+    return { status: r.status, json: async () => body };
   };
 }

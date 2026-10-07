@@ -3,8 +3,9 @@ import { describe, expect, test } from "bun:test";
 import { crosscheck } from "../src/crosscheck";
 import { splitText } from "../src/extract";
 import { guard } from "../src/guard";
+import { plain, renderEnglish } from "../src/render";
 import type { ParsedItem } from "../src/types";
-import { verifyItem, type Fetch } from "../src/verify";
+import { cachedFetch, verifyItem, type Fetch } from "../src/verify";
 import { english } from "./golden/english";
 import { thai } from "./golden/thai";
 
@@ -96,6 +97,55 @@ describe("verify: entries that do not match a real record are flagged", () => {
     const book = { title: [vyg.csl.title], author: [{ family: "Vygotsky" }], issued: { "date-parts": [[1980]] } };
     const c = await verifyItem(it(1), fake({ "query.bibliographic": { status: 200, body: { message: { items: [book] } } } }));
     expect(c.status).toBe("format-only");
+  });
+  // Found in dogfood on a real ThaiJO reference list (2026-10-07).
+  test("the search names the author and year range, so a common title still finds its record", async () => {
+    let asked = "";
+    const spy: Fetch = async (url) => ((asked = url), { status: 200, json: async () => ({ message: { items: [] } }) });
+    const x = it(1, english[8]);
+    await verifyItem(x, spy);
+    expect(asked).toContain("query.author=Brown");
+    expect(asked).toContain("filter=from-pub-date:2014,until-pub-date:2016");
+  });
+  test("a shortened journal name is corrected to the published one and reported", async () => {
+    const x = it(1, grady);
+    x.csl["container-title"] = "Popular Media Culture";
+    const c = await verifyItem(x, fake({ "10.1037": { status: 200, body: { message: { ...gradyWork, "container-title": ["Psychology of Popular Media Culture"] } } } }));
+    expect(c.csl["container-title"]).toBe("Psychology of Popular Media Culture");
+    expect(c.sourced[0]).toBe('แก้ชื่อวารสารตามฐานข้อมูล Crossref: "Popular Media Culture" เป็น "Psychology of Popular Media Culture"');
+    expect(c.status).toBe("verified");
+  });
+  test("pages that disagree with the record are flagged, not overwritten", async () => {
+    const x = it(1, grady);
+    x.csl.page = "1-22";
+    const c = await verifyItem(x, fake({ "10.1037": { status: 200, body: { message: { ...gradyWork, page: "1064" } } } }));
+    expect(c.csl.page).toBe("1-22");
+    expect([c.status, c.reasons]).toEqual(["needs-review", ["เลขหน้าไม่ตรงกับฐานข้อมูล (ลูกค้า 1, ฐานข้อมูล 1064)"]]);
+  });
+  // Found in dogfood: Crossref rate limits (429) were reported as "not found" and cached.
+  test("a rate-limited search is a failed check, not a missing article", async () => {
+    const c = await verifyItem(it(1, english[8]), fake({ "query.bibliographic": { status: 429 } }));
+    expect([c.status, c.reasons[0]]).toEqual(["needs-review", "ค้นฐานข้อมูลไม่สำเร็จ (HTTP 429) ไม่ได้แปลว่าไม่พบ ให้ build ใหม่ภายหลัง"]);
+  });
+  test("failures are not cached, answers are", async () => {
+    const cache: Record<string, any> = {};
+    let n = 0;
+    const flaky: Fetch = async () => (++n === 1 ? { status: 429, json: async () => null } : { status: 200, json: async () => ({ message: { items: [] } }) });
+    const get = cachedFetch(flaky, cache);
+    expect((await get("u")).status).toBe(429);
+    expect(cache).toEqual({});
+    expect((await get("u")).status).toBe(200);
+    expect((await get("u")).status).toBe(200);
+    expect(n).toBe(2);
+  });
+  // Found in dogfood: an article number was filled as a page ("57(6), 100924").
+  test("an article number from the record is printed as Article N, not as pages", async () => {
+    const x = it(1, grady);
+    delete x.csl.page;
+    const c = await verifyItem(x, fake({ "10.1037": { status: 200, body: { message: { ...gradyWork, page: "100924", "article-number": "100924" } } } }));
+    expect([c.csl.page, c.csl.number]).toEqual([undefined, "100924"]);
+    const [r] = await renderEnglish([c]);
+    expect(plain(r.md)).toContain("Psychology of Popular Media Culture, 8(3), Article 100924. https://doi.org/");
   });
   test("a book with no record is format-only, not blocked", async () => {
     const c = await verifyItem(it(1), fake({ "query.bibliographic": { status: 200, body: { message: { items: [] } } } }));
