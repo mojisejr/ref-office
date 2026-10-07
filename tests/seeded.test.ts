@@ -83,10 +83,10 @@ describe("verify: entries that do not match a real record are flagged", () => {
     expect(c.csl.DOI).toBe("10.1037/ppm0000185");
     expect(c.sourced).toEqual(["เพิ่ม DOI จากฐานข้อมูล Crossref: 10.1037/ppm0000185", "เพิ่มเลขหน้าจากฐานข้อมูล Crossref: 207-217"]);
   });
-  test("a journal article nobody can find", async () => {
+  test("a journal article nobody can find is format-only and listed for the customer", async () => {
     const x = it(1, english[8]);
     const c = await verifyItem(x, fake({ "query.bibliographic": { status: 200, body: { message: { items: [] } } } }));
-    expect(c.status).toBe("needs-review");
+    expect(c.status).toBe("format-only");
   });
   test("a book found by search is confirmed but gets no DOI from a possible other edition", async () => {
     const book = { title: [vyg.csl.title], DOI: "10.2307/j.ctvjf9vz4", author: [{ family: "Vygotsky" }], issued: { "date-parts": [[1978]] } };
@@ -151,9 +151,10 @@ describe("verify: entries that do not match a real record are flagged", () => {
     const c = await verifyItem(it(1), fake({ "query.bibliographic": { status: 200, body: { message: { items: [] } } } }));
     expect(c.status).toBe("format-only");
   });
-  test("every Thai entry waits for the owner", async () => {
-    const c = await verifyItem(it(1, thai[0], "th"), fake({}));
-    expect(c.status).toBe("needs-review");
+  test("a Thai entry is format-only unless the agent doubts it", async () => {
+    expect((await verifyItem(it(1, thai[0], "th"), fake({}))).status).toBe("format-only");
+    const doubted = { ...it(1, thai[0], "th"), uncertain: ["ไม่แน่ใจว่าชื่อผู้แต่งจบตรงไหน"] };
+    expect((await verifyItem(doubted, fake({}))).status).toBe("needs-review");
   });
   test("the agent's own doubt blocks even a verified match", async () => {
     const x = { ...it(1, grady), uncertain: ["ชื่อวารสารอ่านไม่ออก"] };

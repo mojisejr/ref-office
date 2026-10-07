@@ -3,7 +3,7 @@
 export type Name = { family: string; given?: string } | { literal: string };
 
 export type Csl = {
-  type: "book" | "chapter" | "article-journal" | "thesis" | "paper-conference" | "webpage" | "report";
+  type: "book" | "chapter" | "article-journal" | "thesis" | "paper-conference" | "speech" | "webpage" | "report";
   author?: Name[];
   editor?: Name[];
   issued?: { "date-parts": [[number, number?, number?]] } | { literal: string };
@@ -18,6 +18,9 @@ export type Csl = {
   publisher?: string;
   genre?: string;
   archive?: string;
+  /** Conference presentations (type speech): genre "Paper presentation", the event and its place. */
+  "event-title"?: string;
+  "event-place"?: string;
   URL?: string;
   DOI?: string;
   "year-suffix"?: string;

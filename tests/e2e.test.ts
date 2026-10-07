@@ -51,9 +51,12 @@ describe("a chapter goes through the office", async () => {
     expect(ex.fieldCodes).toEqual([]);
   });
 
-  test("Thai entries hold the build for the owner; nothing is packaged", async () => {
+  test("an entry the agent doubts holds the build for the owner; nothing is packaged", async () => {
     writeFileSync(join(dir, "work", "parsed.json"), JSON.stringify({
-      items: picks.map((g, i) => ({ source: i + 1, lang: /\p{Script=Thai}/u.test(g.raw) ? "th" : "en", csl: g.csl })),
+      items: picks.map((g, i) => ({
+        source: i + 1, lang: /\p{Script=Thai}/u.test(g.raw) ? "th" : "en", csl: g.csl,
+        ...(i >= 3 ? { uncertain: ["ตรวจการแบ่งชื่อผู้แต่ง"] } : {}),
+      })),
     }));
     const r = await buildJob(dir, { fetch: fetchFake, pdf: false });
     expect(r).toEqual({ outcome: "needs-review", flagged: [4, 5] });

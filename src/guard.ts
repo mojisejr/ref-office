@@ -6,7 +6,7 @@ import type { Name, Parsed, ParsedItem } from "./types";
 
 export type GuardError = { source: number | null; problem: string };
 
-const TYPES = new Set(["book", "chapter", "article-journal", "thesis", "paper-conference", "webpage", "report"]);
+const TYPES = new Set(["book", "chapter", "article-journal", "thesis", "paper-conference", "speech", "webpage", "report"]);
 
 export function norm(s: string): string {
   return s

@@ -1,6 +1,8 @@
 // Checks each parsed item against Crossref and decides its status:
-// verified (matched a real record), format-only (a kind Crossref does not
-// cover, formatted but not checked), or needs-review (blocks release).
+// verified (matched a real record), format-only (formatted but not checked:
+// Thai works, and works Crossref does not hold), or needs-review (blocks
+// release). Owner decision 2026-10-07: only a concrete doubt or a disagreement
+// with a real record is flagged; the customer's report lists every unchecked entry.
 import { norm, year } from "./guard";
 import type { Checked, ParsedItem } from "./types";
 
@@ -118,10 +120,7 @@ export async function verifyItem(item: ParsedItem, get: Fetch): Promise<Checked>
     sourced,
   });
 
-  if (item.lang === "th") {
-    reasons.push("รายการภาษาไทย: ยังตรวจกับฐานข้อมูลอัตโนมัติไม่ได้ ให้เจ้าของดู");
-    return done("needs-review");
-  }
+  if (item.lang === "th") return done("format-only");
   if (item.csl.type === "webpage") return done("format-only");
 
   if (item.csl.DOI) {
@@ -170,10 +169,6 @@ export async function verifyItem(item: ParsedItem, get: Fetch): Promise<Checked>
       if (wy && y && wy !== y) reasons.push(`ปีไม่ตรงกับฐานข้อมูล (ลูกค้า ${y}, ฐานข้อมูล ${wy})`);
       return done("verified", article ? fill(item, hit, sourced, reasons) : item);
     }
-  }
-  if (item.csl.type === "article-journal") {
-    reasons.push("ไม่พบบทความนี้ในฐานข้อมูล ตรวจชื่อเรื่อง ชื่อวารสาร และปี");
-    return done("needs-review");
   }
   return done("format-only");
 }
